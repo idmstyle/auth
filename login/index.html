@@ -29,9 +29,9 @@
             <div id="form-wrap">
                 <div style="font-size: 24px; line-height: 80px; font-weight: 700; letter-spacing: 0.5em; text-align: center;">欢迎登录</div>
                 <div style="font-size:16px; line-height: 36px; width: 100%; display: flex; margin: 30px 0 10px 0;">
-                    <div style="display:inline-block; width: 64px; text-align: left;">用户名：</div>
+                    <div style="display:inline-block; width: 64px; text-align: left;">邮箱：</div>
                     <div style="display: inline-block; flex-grow: 1;">
-                        <input style="width: calc(100% - 24px); padding: 0px 10px; height: 32px; outline: none;" id="username" type="text" name="username" />
+                        <input style="width: calc(100% - 24px); padding: 0px 10px; height: 32px; outline: none;" id="email" type="text" name="email" />
                     </div>
                 </div>
                 <div style="font-size:16px; line-height: 36px; width: 100%; display: flex; margin: 30px 0 10px 0;">
@@ -45,27 +45,45 @@
                 </div>
             </div>
         </div>
-        <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/crypto-js/4.1.1/crypto-js.min.js" type="application/javascript"></script>
         <script type="text/javascript">
             async function loginBtnClick(event) {
                 event.preventDefault();
-                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                if (!username && !password) return false;
+                if (!email && !password) return false;
+
+                let data = {
+                    email: email,
+                    password: password
+                };
+
+                let options = {
+                    'method': 'POST',
+                    'body': JSON.stringify(data),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                };
+                let response = await fetch('https://open.dmstyle.cn/api/users/login', options);
+                let token = await response.json();
+                // axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 
                 let user = {
-                    username: username,
-                    password: password
+                    username: email,
+                    email: email,
+                    password: password,
+                    authorization: token.value
                 };
                 window.localStorage.setItem('user', JSON.stringify(user));
 
-                const redirect = getRedirectURL();
-                if (redirect) window.location.href = redirect;
+                let redirect = getRedirectURL();
+                if (redirect == null) redirect = '/factory';
+                window.location.href = redirect;
             }
 
             function getRedirectURL() {
                 let redirect = (new URL(window.location)).searchParams.get('redirect');
-                return decodeURIComponent(redirect);
+                return redirect == null ? null : decodeURIComponent(redirect);
             }
         </script>
     </body>
