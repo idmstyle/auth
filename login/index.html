@@ -64,7 +64,8 @@
                         "Content-Type": "application/json",
                     },
                 };
-                let response = await fetch('https://open.dmstyle.cn/api/users/login', options);
+                let baseURL = getApiBaseURL();
+                let response = await fetch(`${baseURL}/api/users/login`, options);
                 let token = await response.json();
                 // axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 
@@ -72,7 +73,7 @@
                     username: email,
                     email: email,
                     password: password,
-                    authorization: token.value
+                    authorization: `${token.type} ${token.value}`
                 };
                 window.localStorage.setItem('user', JSON.stringify(user));
 
@@ -84,6 +85,16 @@
             function getRedirectURL() {
                 let redirect = (new URL(window.location)).searchParams.get('redirect');
                 return redirect == null ? null : decodeURIComponent(redirect);
+            }
+
+            function getApiBaseURL() {
+                let environment = window.localStorage.getItem('environment');
+                if (!environment) environment = 'production';
+                return {
+                    "production": "https://open.dmstyle.cn",
+                    "development": "http://localhost:3333",
+                    "testing": "http://localhost:3333",
+                }[environment];
             }
         </script>
     </body>
